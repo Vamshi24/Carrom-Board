@@ -1,0 +1,45 @@
+#include <iostream>
+#include <GL/glut.h>
+using namespace std;
+class Box
+{
+	public :
+		float a;
+		float c; 
+		float red; 
+		float green;
+		float blue;
+                float x;
+                float y;
+                float z;
+		void drawbox(float a,float c,float r, float g, float b)
+		{
+			glBegin(GL_QUADS);
+			red = r;
+			green = g;
+			blue = b;
+			glColor3f(r,g,b);
+			glVertex2f(-a/2,c/2);	
+			glVertex2f(-a/2,-c/2);
+			glVertex2f(a/2,-c/2);
+			glVertex2f(a/2,c/2);
+			glEnd();
+		}
+                void drawstrikerbox(float a,float c,float x,float y,float z,float r, float g, float b)
+		{
+			glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+			glTranslatef(x,y,z);
+			glBegin(GL_QUADS);
+			red = r;
+			green = g;
+			blue = b;
+			glColor3f(r,g,b);
+			glVertex2f(-a/2,c/2);	
+			glVertex2f(-a/2,-c/2);
+			glVertex2f(a/2,-c/2);
+			glVertex2f(a/2,c/2);
+			glEnd();
+			glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
+		}
+
+};

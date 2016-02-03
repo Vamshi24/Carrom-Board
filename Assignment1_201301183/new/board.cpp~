@@ -1,0 +1,299 @@
+#include <iostream>
+#include <cmath>
+#include <GL/glut.h>
+#include <stdio.h>
+#include "box.h"
+#include "hole.h"
+using namespace std;
+#define PI 3.141592653589
+#define DEG2RAD(deg) (deg * PI / 180)
+Box outerbox,innerbox,u,u1,u2,u3;
+hole hol[4],s[1],hole[8],coin[9],p;
+/*int g,h,k;
+for(int g=0;g<9;g++)
+{
+	float coin[g].velx=0.0f;
+	float vcoin[g].vely=0.0f;
+	if(g==0)
+	{
+		float s[g].velx=0.0f;
+		float s[g].vely=0.0f;
+	}
+}*/
+float tri_x = 0.0f;
+float tri_y = 0.0f;
+float theta = 0.0f;
+float power_ball=-0.6f; 
+
+void initGL() 
+{
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f); // Set background (clear) color to white
+}
+
+void drawScene() 
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity(); 
+	//box 
+	glPushMatrix();
+	outerbox.drawbox(2.0f,2.0f,0.0f,0.0f,0.0f);
+	glPopMatrix();
+	glPushMatrix();
+	innerbox.drawbox(1.75f,1.75f,1.0f,0.8f,0.45f);
+	glPopMatrix();
+	//holes
+	float r1=0.825f,r2=0.825f;
+	for(int i=0;i<4;i++)
+	{
+		glPushMatrix();
+		coin[i].drawcoin(r2,r1,0.0f,0.0f,0.0f,0.0f,0.05f);
+		float temp1 = r2;
+		r2 = -r1;
+		r1 = temp1;
+		glPopMatrix();
+	}
+	// coins
+	float s3=0.225f,s1=0.225f,s2=0.0f;
+	for(int i=0;i<10;i++)
+	{
+		if(i<4)
+		{
+			glPushMatrix();
+			coin[i].drawcoin(s3,s1,0.0f,0.0f,0.0f,0.0f,0.035f);
+			float temp = s3;
+			s3 = -s1;
+			s1 = temp;
+			glPopMatrix();
+		}
+		else if(i>4 && i<9)
+		{
+			glPushMatrix();
+			coin[i].drawcoin(s3,s2,0.0f,0.8f,0.4f,0.0f,0.035f);
+			float temp = s3;
+			s3 = -s2;
+			s2 = temp;
+			glPopMatrix();
+		}
+		else if(i == 9)
+		{
+			glPushMatrix();
+			coin[i].drawcoin(0.0f,0.0f,0.0f,1.0f,0.0f,0.0f,0.035f);
+			glPopMatrix();
+		}
+	}
+	//striker box
+	glPushMatrix();
+	u.drawstrikerbox(1.1f,0.1f,0.0f,0.65f,0.0f,0.0f,0.0f,0.0f);
+	glPopMatrix();
+	//striker box
+	glPushMatrix();
+	u1.drawstrikerbox(1.1f,0.1f,0.0f,-0.65f,0.0f,0.0f,0.0f,0.0f);
+	glPopMatrix();
+	//striker box
+	glPushMatrix();
+	u2.drawstrikerbox(0.1f,1.1f,0.65f,0.0f,0.0f,0.0f,0.0f,0.0f);
+	glPopMatrix();
+	//striker box
+	glPushMatrix();
+	u3.drawstrikerbox(0.1f,1.1f,-0.65f,0.0f,0.0f,0.0f,0.0f,0.0f);
+	glPopMatrix();
+	//holes on striker boxes
+	float x1 = 0.55f,y1 = 0.65f,x2 = -0.55f,y2 = 0.65f;
+	for(int i = 0;i < 9;i++)
+	{
+		if(i < 4)
+		{
+			glPushMatrix();
+			hole[i].drawhole(x1,y1,0.0f,1.0f,0.0f,0.0f,0.05f);
+			glPopMatrix();
+			float temp = x1;
+			x1 =(-y1);
+			y1 = temp;
+		}
+		else if(i > 4)
+		{
+			glPushMatrix();
+			hole[i].drawhole(x2,y2,0.0f,1.0f,0.0f,0.0f,0.05f);
+			glPopMatrix();
+			float temp = x2;
+			x2 =(-y2);
+			y2 = (temp);
+		}
+	}
+	// striker
+	glPushMatrix();
+	glTranslatef(tri_x, tri_y, 0.0f);
+	glRotatef(theta, 0.0f, 0.0f, 1.0f);
+	glScalef(0.5f, 0.5f, 0.5f);
+	s[0].drawstriker(0.0f,-1.3f,0.0f,0.5f,0.5f,0.5f,0.09f);
+	glPopMatrix();
+	//draw line
+	glPushMatrix();
+	glBegin(GL_LINES);
+	glVertex2f(tri_x,tri_y-0.035f);
+	glVertex2f(tri_x,tri_y-0.6f);
+	glColor3f(1.0f,1.0f,1.0f);
+	glPopMatrix();
+        //power bar
+        glPushMatrix();
+ 	glBegin(GL_LINES);
+	glColor3f(1.0f,0.0f,0.0f);
+ 	glVertex2f(-0.92f,0.0f);
+	glVertex2f(-0.92f,-0.60f);
+	glEnd();
+ 	glPopMatrix();
+ 	glPushMatrix();
+ 	p.drawhole(-0.92f,power_ball,0.0f,0.0f,1.0f,0.0f,0.02f);
+ 	glPopMatrix();
+	glEnd();
+	glFlush();
+}
+
+void handleResize(int w, int h) 
+{
+	glViewport(0, 0, w, h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45.0f, (float)w / (float)h, 0.1f, 200.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
+void handleKeypress1(unsigned char key, int x, int y) 
+{
+	if (key == 27) 
+	{
+		exit(0);     // escape key is pressed
+	}
+}
+
+void handleKeypress2(int key, int x, int y) 
+{
+	if (key == GLUT_KEY_LEFT && tri_x <= 0.55f && tri_x >= -0.55f)
+		tri_x -= 0.05;
+	if (key == GLUT_KEY_RIGHT && tri_x <= 0.55f && tri_x >= -0.55f)
+	if (key == GLUT_KEY_UP && power_ball <= 0.0f && power_ball >= -0.60f)
+		power_ball += 0.05;
+	if (key == GLUT_KEY_DOWN && power_ball <= 0.0f && power_ball >= -0.60f)
+		power_ball -= 0.05;
+	if(key == 32)
+    	{
+    		//strike.flag_vel = 1;
+    		s[0].velx = (0.05)*sin(DEG2RAD(-theta));
+    		s[0].vely = (0.05)*cos(DEG2RAD(-theta));
+    	}
+}
+
+void handleMouseclick(int button, int state, int x, int y) 
+{
+	if (state == GLUT_DOWN)
+	{
+		if (button == GLUT_LEFT_BUTTON)
+		{
+			theta += 90;
+		}
+		else if (button == GLUT_RIGHT_BUTTON)
+		{
+			theta -= 90;
+		}
+	}
+
+}
+/*// Function to handle all calculations in the scene
+// updated evry 10 milliseconds
+void update(int value) 
+{    
+// collision of striker with board
+if(s[0].x + 0.09f > 3.5f/2 || s[0].x - 0.09f < -3.5f/2)
+s[0].velx *= -1;
+if(s[0].y + 0.09f > 3.5f/2 || s[0].y - 0.09f < -3.5f/2)
+s[0].vely *= -1;
+//collision of coin with board
+for(int i=0;i<9;i++)
+{
+if (coin[i].x + 0.035f > 3.5f/2 || coin[i].x - 0.035f < -3.5f/2)
+coin[i].velx *= -1;
+if (coin[i].y + 0.035f > 3.5f/2 || coin[i].y - 0.035f < -3.5f/2)
+coin[i].vely *= -1;
+}
+for(int i=0;i<9;i++)
+{
+float d1=0,temp,temp1,temp2,temp3; 
+d1 = sqrt(pow((s[0].x - coin[i].x),2) + pow((s[0].y - coin[i].y),2));
+if(d1!=0 && (d1 <= (0.035f + 0.09f)))
+{
+//collision of striker and coin
+temp = (2*coin[i].velx+1*s[0].velx)/3;
+temp1 = (-1*coin[i].velx+4*s[0].velx)/3;
+temp2 = (2*coin[i].vely+1*s[0].vely)/3;
+temp3 = (-1*coin[i].vely+4*s[0].vely)/3;
+s[0].velx = temp;
+coin[i].velx = temp1;
+s[0].vely = temp2;
+coin[y].vely = temp3;
+}
+float d2=0;
+for(int j=0;j<9;j++)
+{
+d2 = sqrt(pow((coin[i].x - coin[j].x),2) + pow((coin[i].y - coin[j].y),2));
+if(d2!=0 && (d2 <= (0.035f + 0.035f)))
+//collision of coin and coin
+float temp4 = coin[i].velx;
+coin[i].velx = coin[j].velx;
+coin[j].velx = temp4;
+float temp5 = coin[i].vely;
+coin[i].vely = coin[j].vely;
+coin[j].vely = temp5;
+}
+}
+}
+//collision of striker with hole
+//collision of coin with hole
+float d3=0,d4=0;
+for(int i=0;i<4;i++)
+{
+for(int j=0;j<9;j++)
+{
+d1 = sqrt(pow((hole[i]x - coin[j]x),2) + pow((hole[i]y - coin[j]y),2));
+if(d3!=0 && (d3 <= (0.035f + 0.05f)))
+{
+radius of coin = 0;
+}
+}
+}
+for(int i=0;i<9;i++)
+{
+s[0]_velx=0.98*ball_velx;
+s[0]_vely=0.98*ball_vely;
+coin[i]_velx=0.98*coin[i]_velx;
+coin[i]_vely=0.98*coin[i]_vely;
+}
+//Update position of ball
+ball_x += ball_velx;
+ball_y += ball_vely;
+
+ball1_x += ball1_velx;
+ball1_y += ball1_vely;
+
+glutTimerFunc(10, update, 0);
+}
+	*/
+int main(int argc, char **argv) 
+{
+	glutInit(&argc, argv); // Initialize GLUT
+	//glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+	glutInitWindowSize(540, 540);
+	glutInitWindowPosition(450, 100);
+	glutCreateWindow("CARROM BOARD");  // Setup the window
+	initGL() ;       // Our own OpenGL initialization
+	glutDisplayFunc(drawScene);
+	glutIdleFunc(drawScene);
+	glutKeyboardFunc(handleKeypress1);
+	glutSpecialFunc(handleKeypress2);
+	glutMouseFunc(handleMouseclick);
+	//glutReshapeFunc(handleResize);
+	//glutTimerFunc(10, update, 0);
+	glutMainLoop(); // Enter event-processing loop
+	return 0;
+}

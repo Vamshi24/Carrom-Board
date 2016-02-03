@@ -1,0 +1,353 @@
+#include <iostream>
+#include <cmath>
+#include <GL/glut.h>
+#include <stdio.h>
+#include "box1.h"
+#include "hole1.h"
+using namespace std;
+#define PI 3.141592653589
+#define DEG2RAD(deg) (deg * PI / 180)
+Box u,u1,u2,u3;
+hole hol[4],s[1],hole[8],coin[9],p,c;
+float tri_x = 0.0f;
+float tri_y = -6.25f;
+float theta = 0.0f;
+float pointer=-6.75f; 
+
+void initRendering() 
+{
+	glEnable(GL_DEPTH_TEST);        // Enable objects to be drawn ahead/behind one another
+	glEnable(GL_COLOR_MATERIAL);    // Enable coloring
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);   // Setting a background color(white)
+}
+
+void drawScene() 
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity(); 
+	//brown color of the board
+	glPushMatrix();
+	glTranslatef(-2.2f, 0.0f, -8.0f);
+	glBegin(GL_QUADS);
+	glColor3f(0.0f, 0.0f, 0.0f);
+	glVertex2f(-3.0f  , -3.0f);
+	glVertex2f(-3.0f , 3.0f);
+	glVertex2f(3.0f , 3.0f);
+	glVertex2f(3.0f , -3.0f);
+	glEnd();
+	glPopMatrix();
+	//cream color of the board
+	glPushMatrix();
+	glTranslatef(-2.2f, 0.0f, -8.0f);
+	glBegin(GL_QUADS);
+	glColor3f(1.0f, 0.8f, 0.45f);
+	glVertex2f(-2.75f , -2.75f);
+	glVertex2f(-2.75f , 2.75f);
+	glVertex2f(2.75f , 2.75f);
+	glVertex2f(2.75f , -2.75f);
+	glEnd();
+	glPopMatrix();
+	//holes
+	float r1=5.1f,r2=5.1f;
+        glTranslatef(-4.4f, 0.0f, -8.0f);
+	for(int i=0;i<4;i++)
+	{
+	glPushMatrix();
+	hol[i].drawhole(r2,r1,-8.0f,0.0f,0.0f,0.0f,0.37f);
+	float temp1 = r2;
+	r2 = -r1;
+	r1 = temp1;
+	glPopMatrix();
+	}
+	glPushMatrix();
+	glTranslatef(-2.35f, 0.5f, -8.0f);
+	c.drawCircle(0.0f,0.0f,-8.0f,0.0f,0.0f,0.0f,2.50f);
+	glPopMatrix();
+	// coins
+	float s3=2.200f,s2=0.0f,s0=1.55f,s1=1.55f;
+	glTranslatef(-2.35f, 0.5f, -8.0f);
+	for(int i=0;i<9;i++)
+	{
+		if(i<4)
+		{
+			glPushMatrix();
+			coin[i].drawcoin(s0,s1,-8.0f,0.0f,0.0f,0.0f,0.35f);
+			float temp = s0;
+			s0 = -s1;
+			s1 = temp;
+			glPopMatrix();
+		}
+		else if(i>=4 && i<8)
+		{
+			glPushMatrix();
+			coin[i].drawcoin(s3,s2,-8.0f,0.8f,0.4f,0.0f,0.35f);
+			float temp = s3;
+			s3 = -s2;
+			s2 = temp;
+			glPopMatrix();
+		}
+		else if(i == 8)
+		{
+			glPushMatrix();
+			coin[i].drawcoin(0.0f,0.0f,-8.0f,1.0f,0.0f,0.0f,0.35f);
+			glPopMatrix();
+		}
+	}
+	//striker box
+	glPushMatrix();
+	u.drawstrikerbox(10.0f,0.9f,0.0f,5.25f,-8.0f,0.0f,0.0f,0.0f);
+	glPopMatrix();
+	//striker box
+	glPushMatrix();
+	u1.drawstrikerbox(10.0f,0.9f,0.0f,-6.25f,-8.0f,0.0f,0.0f,0.0f);
+	glPopMatrix();
+	//striker box
+	glPushMatrix();
+	u2.drawstrikerbox(0.9f,10.0f,5.65f,-0.5f,-8.0f,0.0f,0.0f,0.0f);
+	glPopMatrix();
+	//striker box
+	glPushMatrix();
+	u3.drawstrikerbox(0.9f,10.0f,-5.65f,-0.5f,-8.0f,0.0f,0.0f,0.0f);
+	glPopMatrix();
+        //stricker box holes
+	glPushMatrix();
+	hole[0].drawhole(-5.25f,-6.25f,-8.0f,1.0f,0.0f,0.0f,0.5f);
+	glPopMatrix();
+	glPushMatrix();
+	hole[1].drawhole(-5.635f,-5.25f,-8.0f,1.0f,0.0f,0.0f,0.5f);
+	glPopMatrix();
+	glPushMatrix();
+	hole[2].drawhole(-5.25f,5.25f,-8.0f,1.0f,0.0f,0.0f,0.5f);
+	glPopMatrix();
+	glPushMatrix();
+	hole[3].drawhole(5.25f,5.25f,-8.0f,1.0f,0.0f,0.0f,0.5f);
+	glPopMatrix();
+	glPushMatrix();
+	hole[4].drawhole(5.25f,-6.25f,-8.0f,1.0f,0.0f,0.0f,0.5f);
+	glPopMatrix();
+	glPushMatrix();
+	hole[5].drawhole(-5.65f,4.25f,-8.0f,1.0f,0.0f,0.0f,0.5f);
+	glPopMatrix();
+	glPushMatrix();
+	hole[6].drawhole(5.635f,4.25f,-8.0f,1.0f,0.0f,0.0f,0.5f);
+	glPopMatrix();
+	glPushMatrix();
+	hole[7].drawhole(5.65f,-5.25,-8.0f,1.0f,0.0f,0.0f,0.5f);
+	glPopMatrix();
+	// striker
+	glPushMatrix();
+	s[0].drawstriker(tri_x,tri_y,-8.0f,0.5f,0.5f,0.5f,0.4f);
+	glPopMatrix();
+	//draw line
+	//glPushMatrix();
+	//glBegin(GL_LINES);
+	//glVertex2f(tri_x,tri_y-0.035f);
+	//glVertex2f(tri_x,tri_y-0.6f);
+	//glColor3f(1.0f,1.0f,1.0f);
+	//glPopMatrix();
+	// speedometer
+        glTranslatef(10.0f, -2.4f, -8.0f);
+        glPushMatrix();
+        glBegin(GL_QUADS);
+        glColor3f(0.0,1.0,0.0);
+        glVertex2f(2.75,-7.0);
+        glVertex2f(2.0,-7.0);
+        glVertex2f(2.0,pointer);
+        glVertex2f(2.75,pointer);
+        glColor3f(1.0,0.0,0.1);
+        glVertex2f(2.0,10.0);
+        glVertex2f(2.75,10.0);
+        glVertex2f(2.75,pointer);
+        glVertex2f(2.0,pointer);
+        glEnd();
+        glColor3f(0.4,0.3,0.1);
+        glVertex2f(0.48,pointer);
+        glVertex2f(0.55,pointer);
+        glPopMatrix();
+	glEnd();
+	glutSwapBuffers();
+}
+
+void handleResize(int w, int h) 
+{
+	glViewport(0, 0, w, h);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45.0f, (float)w / (float)h, 0.1f, 200.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+}
+
+void handleKeypress1(unsigned char key, int x, int y) 
+{
+	if (key == 27) 
+	{
+		exit(0);     // escape key is pressed
+	}
+	if (key == 32)
+	{
+		s[0].velx = 0.0f;
+		s[0].vely = 0.1f;
+	}
+}
+
+void handleKeypress2(int key, int x, int y) 
+{
+	if (key == GLUT_KEY_LEFT && tri_x > -5.25f)
+		tri_x -= 0.1;
+	if (key == GLUT_KEY_RIGHT && tri_x < 5.25f)
+		tri_x += 0.1;
+	if (key == GLUT_KEY_UP && pointer < 10.0f)
+		pointer += 0.1;
+	if (key == GLUT_KEY_DOWN && pointer > -6.75f)
+		pointer -= 0.1;
+}
+
+void handleMouseclick(int button, int state, int x, int y) 
+{
+	if (state == GLUT_DOWN)
+	{
+		if (button == GLUT_LEFT_BUTTON)
+		{
+			theta += 90;
+		}
+		else if (button == GLUT_RIGHT_BUTTON)
+		{
+			theta -= 90;
+		}
+	}
+
+}
+
+void update(int value)
+{
+	 if (s[0].velx != 0.0f || s[0].vely != 0.0f)
+	 {
+	 	if (tri_x + 0.4f > 8.0f || tri_x - 0.4f < -7.7f)
+    			s[0].velx *=-1;
+    		if (tri_y + 0.4f > 7.35f || tri_y - 0.4f < -8.35f)
+    			s[0].vely *=-1;
+		for (int i = 0; i < 9; ++i)
+   		{
+   			if (coin[i].a + 0.35f > 8.0f || coin[i].a - 0.35f < -7.7f)
+   				coin[i].velx *=-1;
+   			if (coin[i].c + 0.35f > 7.35f || coin[i].c - 0.35f < -8.35f)
+   				coin[i].vely *=-1;
+   		}
+	 	// stiker-coin collision
+   		for (int i = 0; i < 9; ++i)
+   		{
+   			float dx = tri_x - coin[i].a;
+   			float dy = tri_y - coin[i].c;
+   			float sumRad = 0.4f + 0.3f;
+   			float sqrRad = sumRad * sumRad;
+   			float sqrDistance = pow(dx,2) + pow(dy,2);
+   			if (sqrDistance <= sqrRad)
+   			{
+   				float d = sqrt(sqrDistance);
+   				float collision[2];
+   				collision[0] = (dx)/d; collision[1] = (dy)/d; // cos and sin respectively
+   				float new1[2],new2[2];
+   				new1[0] = (s[0].velx)*collision[0] + (s[0].vely)*collision[1];
+   				new2[0] = (coin[i].velx)*collision[0] + (coin[i].vely)*collision[1];
+   				new1[1] = (s[0].vely)*collision[0] - (s[0].velx)*collision[1];
+   				new2[1] = (coin[i].vely)*collision[0] - (coin[i].velx)*collision[1];
+   				// similar to 1-d collision along line joining centre
+   				float a1 = (new1[0] + new2[0]*2)/3; //v1n
+   				float a2 = (4*new1[0] - new2[0])/3; // v2n
+   				float final1[2],final2[2];
+   				final1[0] = a1*collision[0] - new1[1]*collision[1];
+   				final1[1] = a1*collision[1] + new1[1]*collision[0];
+   				final2[0] = a2*collision[0] - new2[1]*collision[1];
+   				final2[1] = a2*collision[1] + new2[1]*collision[0];
+   				s[0].velx = final1[0];
+   				s[0].vely = final1[1];
+   				coin[i].velx = final2[0];
+   				coin[i].vely = final2[1];
+   			}
+   		}
+		for (int i = 0; i < 9; ++i)
+		{
+			for (int j = i + 1 ; j < 9; ++j)
+			{
+				float dx = coin[i].a - coin[j].a;
+				float dy = coin[i].c - coin[j].c;
+				float d = sqrt(pow(dx,2) + pow(dy,2));
+				float sumRad = 0.7f;
+				if (d <= sumRad)
+				{
+					float collision[2];
+   					collision[0] = (dx)/d; collision[1] = (dy)/d; // cos and sin respectively
+   					float new1[2],new2[2];
+   					new1[0] = (coin[i].velx)*collision[0] + (coin[i].vely)*collision[1];
+   					new2[0] = (coin[j].velx)*collision[0] + (coin[j].vely)*collision[1];
+   					new1[1] = (coin[i].vely)*collision[0] - (coin[i].velx)*collision[1];
+   					new2[1] = (coin[j].vely)*collision[0] - (coin[j].velx)*collision[1];
+   					// similar to 1-d collision along line joining centre
+   					float a1 = new2[0]; //v1n
+   					float a2 = new1[0]; //v2n
+   					float final1[2],final2[2];
+   					final1[0] = a1*collision[0] - new1[1]*collision[1];
+   					final1[1] = a1*collision[1] + new1[1]*collision[0];
+   					final2[0] = a2*collision[0] - new2[1]*collision[1];
+   					final2[1] = a2*collision[1] + new2[1]*collision[0];
+   					coin[i].velx = final1[0];
+   					coin[i].vely = final1[1];
+   					coin[j].velx = final2[0];
+   					coin[j].vely = final2[1];
+				}
+			}
+		}
+		if (s[0].velx != 0.00f)
+			s[0].velx /=1.01f;
+		if (s[0].vely != 0.00f)
+			s[0].vely /= 1.01f;
+		for (int i = 0; i < 9; ++i)
+		{
+			if (coin[i].velx != 0.00f)
+				coin[i].velx /=1.01f;
+			if (coin[i].vely != 0.00f)
+				coin[i].vely /= 1.01f;
+		}
+		for (int i = 0; i < 9; ++i)
+		{
+			coin[i].a +=coin[i].velx;
+			coin[i].c +=coin[i].vely;
+		}
+		tri_x += s[0].velx;
+		tri_y += s[0].vely;
+	}
+	glutTimerFunc(10,update,0);
+}
+
+int main(int argc, char **argv) {
+
+	// Initialize GLUT
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+
+	int w = glutGet(GLUT_SCREEN_WIDTH);
+	int h = glutGet(GLUT_SCREEN_HEIGHT);
+	int windowWidth = w * 3 / 4;
+	int windowHeight = h * 3 / 4;
+
+	glutInitWindowSize(windowWidth, windowHeight);
+	glutInitWindowPosition((w - windowWidth) / 2, (h - windowHeight) / 2);
+
+	glutCreateWindow("CARROM BOARD");  // Setup the window
+	initRendering();
+
+	// Register callbacks
+	glutDisplayFunc(drawScene);
+	glutIdleFunc(drawScene);
+	glutKeyboardFunc(handleKeypress1);
+	glutSpecialFunc(handleKeypress2);
+	glutMouseFunc(handleMouseclick);
+	glutReshapeFunc(handleResize);
+	glutTimerFunc(10, update, 0);
+
+	glutMainLoop();
+	return 0;
+}
+
